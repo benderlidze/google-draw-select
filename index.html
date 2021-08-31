@@ -30,6 +30,19 @@
         display: none;
     }
 
+    .close {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        float:right;
+    }
+
+    .close:after {
+        display: inline-block;
+        content: "\00d7";
+        /* This will render the 'X' */
+    }
+
     .item {
         padding: 2px;
     }
@@ -38,14 +51,19 @@
 <body>
 
 
-    <div id="modal"></div>
+    <div id="modal">
+        <div class="close" id="close"></div>
+        <div id="modalContent"></div>
+    </div>
     <div id="map" style="width: 100%; height: 100%;"></div>
 
     <script type="text/javascript">
 
 
         let map;
+        const close = document.getElementById("close")
         const modal = document.getElementById("modal")
+        const modalContent = document.getElementById("modalContent")
         const drivers = [];
         const driverNames = [];
         const allMarkers = [];
@@ -75,8 +93,8 @@
             const geocoder = new google.maps.Geocoder()
 
             const drawingManager = new google.maps.drawing.DrawingManager({
-
-                drawingControl: true,
+                drawingMode: google.maps.drawing.OverlayType.POLYGON,
+                drawingControl: false,
                 drawingControlOptions: {
                     position: google.maps.ControlPosition.TOP_CENTER,
                     drawingModes: [
@@ -86,17 +104,7 @@
                         //google.maps.drawing.OverlayType.RECTANGLE,
                     ],
                 },
-                markerOptions: {
-                    icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
-                },
-                circleOptions: {
-                    fillColor: "#ffff00",
-                    fillOpacity: 1,
-                    strokeWeight: 5,
-                    clickable: false,
-                    editable: true,
-                    zIndex: 1,
-                },
+              
             });
             drawingManager.setMap(map);
 
@@ -149,7 +157,7 @@
                         </div>`
 
                     modal.style.display = "inline"
-                    modal.innerHTML = text + content
+                    modalContent.innerHTML = text + content
                 }
 
             });
@@ -250,6 +258,11 @@
                 allMarkers.push(marker);
             }
 
+            close.addEventListener('click', () => {
+                modal.style.display = "none"
+                modalContent.innerHTML = ""
+            })
+
             document.addEventListener("click", e => {
                 if (e.target.classList.contains("set")) {
                     const ids = [];
@@ -287,7 +300,7 @@
                         })
 
                     modal.style.display = "none"
-                    modal.innerHTML = ""
+                    modalContent.innerHTML = ""
 
                 }
             })

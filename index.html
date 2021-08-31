@@ -18,17 +18,35 @@
         width: 100%;
         height: 100%;
     }
+
+    #modal {
+        padding: 10px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        background-color: white;
+        display: none;
+    }
+
+    .item {
+        padding: 2px;
+    }
 </style>
 
 <body>
 
 
+    <div id="modal"></div>
     <div id="map" style="width: 100%; height: 100%;"></div>
 
     <script type="text/javascript">
 
 
         let map;
+        const modal = document.getElementById("modal")
+        const drivers = [];
         const driverNames = [];
         const allMarkers = [];
         const markersInPoly = [];
@@ -112,14 +130,35 @@
                 })
 
                 if (markersInPoly.length > 0) {
+
                     let text = "";
                     markersInPoly.map(i => {
-                        text += i.name + "\n"
+                        // text += `<div class="item">${i.name} -  ${i.orderid} </div>`;
                     })
-                    alert(text);
+                    //alert(text);
+                    text = `<div class="item">${markersInPoly.length} stops selected</div>`;
+
+                    const dList = drivers.map(i => {
+                        return `<option value="${i.name}">${i.name}</option>`
+                    }).join("")
+
+                    const content = `
+                        <div>
+                            <select class="setDriver" id="driverList">${dList}</select><br>
+                            <button class="set" sid="driverList">Set</button>
+                        </div>`
+
+                    modal.style.display = "inline"
+                    modal.innerHTML = text + content
                 }
 
             });
+
+            fetch("https://eolacoffee.com/route/locations.php?drivers=true")
+                .then(i => i.json())
+                .then(data => {
+                    drivers.push(...data)
+                })
 
 
             fetch("https://www.eolacoffee.com/route/locations.php")
@@ -182,13 +221,62 @@
                 });
 
                 marker.addListener("click", e => {
-                    const content = marker.name
+
+                    const dList = drivers.map(i => {
+                        return `<option value="${i.name}">${i.name}</option>`
+                    }).join("")
+
+                    const content = `
+                    <div>
+                        street: ${marker.street} <br>
+                        name: ${marker.name} <br>
+                        <select class="setDriver" id="${pin.orderid}">${dList}</select><br>
+                        <button class="set" sid="${pin.orderid}">Set</button>
+                    </div>`
                     infowindow.setContent(content);
                     infowindow.open(map, marker);
                 });
 
                 allMarkers.push(marker);
             }
+
+            document.addEventListener("click", e => {
+                if (e.target.classList.contains("set")) {
+                    const ids = [];
+                    const id = e.target.getAttribute("sid");
+                    const driver = document.getElementById(id);
+                    const value = driver.value
+                    console.log('value', value);
+
+                    if (id === "driverList") {
+                        ids.push(...markersInPoly.map(i => i.orderid));
+                    } else {
+                        ids.push(id)
+                    }
+
+                    console.log('driver name', value);
+                    console.log('ids', ids);
+                    const data = {
+                        driver: value,
+                        ids: ids
+                    }
+                    fetch('https://www.eolacoffee.com/route/locations.php?assign_driver=true', {
+                        method: 'post',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(function (response) {
+                            console.log(response.status); // Will show you the status
+                            if (response.status === 200) {
+                                reloadData();
+                            }
+
+                        })
+                }
+            })
         }
 
 

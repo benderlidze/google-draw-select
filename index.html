@@ -29,8 +29,19 @@
 
 
         let map;
+        const driverNames = [];
         const allMarkers = [];
         const markersInPoly = [];
+        const colorArray = ['FF6633', 'FFB399', 'FF33FF', 'FFFF99', '00B3E6',
+            'E6B333', '3366E6', '999966', '99FF99', 'B34D4D',
+            '80B300', '809900', 'E6B3B3', '6680B3', '66991A',
+            'FF99E6', 'CCFF1A', 'FF1A66', 'E6331A', '33FFCC',
+            '66994D', 'B366CC', '4D8000', 'B33300', 'CC80CC',
+            '66664D', '991AFF', 'E666FF', '4DB3FF', '1AB399',
+            'E666B3', '33991A', 'CC9999', 'B3B31A', '00E680',
+            '4D8066', '809980', 'E6FF80', '1AFF33', '999933',
+            'FF3380', 'CCCC00', '66E64D', '4D80CC', '9900B3',
+            'E64D66', '4DB380', 'FF4D4D', '99E6E6', '6666FF'];
 
         function initMap() {
 
@@ -43,7 +54,7 @@
             var infowindow = new google.maps.InfoWindow();
             var marker, i;
 
-
+            const geocoder = new google.maps.Geocoder()
 
             const drawingManager = new google.maps.drawing.DrawingManager({
 
@@ -116,25 +127,72 @@
                 .then(data => {
                     console.log('data', data);
                     map.setCenter({ lat: +data.center_lat, lng: +data.center_lng })
+                    const dNames = [];
+
+                    //fill array with unique names 
                     for (const key in data) {
                         const pin = data[key];
-                        marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(+pin.lat, +pin.lng),
-                            map: map,
-                            options: pin
-                        });
-                        google.maps.event.addListener(marker, 'click', (function (marker, i) {
-                            return function () {
-                                console.log('marker', marker);
-                                const content = marker.name
-                                infowindow.setContent(content);
-                                infowindow.open(map, marker);
-                            }
-                        })(marker, i));
-                        allMarkers.push(marker);
+                        dNames.push(pin.driver)
                     }
+                    driverNames.push(...new Set(dNames));
+
+
+                    for (const key in data) {
+                        const pin = data[key];
+
+
+                        // if (pin.lat === null) {
+                        //     geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
+                        //         console.log('results', results);
+                        //         var lat = results[0].geometry.location.lat();
+                        //         var lng = results[0].geometry.location.lng();
+                        //         pin.lat = lat;
+                        //         pin.lng = lng;
+                        //         addMarker(pin)
+                        //     });
+                        // } else {
+                        //     addMarker(pin)
+                        // }
+
+
+                        addMarker(pin)
+                    }
+
+
                 })
+
+            function addMarker(pin) {
+
+                var pinColor = colorArray[driverNames.indexOf(pin.driver)];
+
+                if (pin.driver === undefined) {
+                    pinColor = "000000"
+                }
+
+
+                var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                    new google.maps.Size(21, 34),
+                    new google.maps.Point(0, 0),
+                    new google.maps.Point(10, 34));
+
+                const marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(+pin.lat, +pin.lng),
+                    map: map,
+                    options: pin,
+                    icon: pinImage,
+                });
+
+                marker.addListener("click", e => {
+                    const content = marker.name
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+                });
+
+                allMarkers.push(marker);
+            }
         }
+
+
     </script>
 
     <script

@@ -154,51 +154,61 @@
 
             });
 
-            fetch("https://eolacoffee.com/route/locations.php?drivers=true")
-                .then(i => i.json())
-                .then(data => {
-                    drivers.push(...data)
-                })
+            loadData()
+
+            function loadData() {
+
+                if (allMarkers.length > 0) {
+                    allMarkers.forEach(i => {
+                        i.setMap(null);
+                    })
+                    allMarkers.length = 0;
+                }
+
+                fetch("https://eolacoffee.com/route/locations.php?drivers=true")
+                    .then(i => i.json())
+                    .then(data => {
+                        drivers.push(...data)
+                    })
 
 
-            fetch("https://www.eolacoffee.com/route/locations.php")
-                .then(i => i.json())
-                .then(data => {
-                    console.log('data', data);
-                    map.setCenter({ lat: +data.center_lat, lng: +data.center_lng })
-                    const dNames = [];
+                fetch("https://www.eolacoffee.com/route/locations.php")
+                    .then(i => i.json())
+                    .then(data => {
+                        console.log('data', data);
+                        map.setCenter({ lat: +data.center_lat, lng: +data.center_lng })
+                        const dNames = [];
 
-                    //fill array with unique names 
-                    for (const key in data) {
-                        const pin = data[key];
-                        dNames.push(pin.driver)
-                    }
-                    driverNames.push(...new Set(dNames));
-
-
-                    for (const key in data) {
-                        const pin = data[key];
+                        //fill array with unique names 
+                        for (const key in data) {
+                            const pin = data[key];
+                            dNames.push(pin.driver)
+                        }
+                        driverNames.push(...new Set(dNames));
 
 
-                        // if (pin.lat === null) {
-                        //     geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
-                        //         console.log('results', results);
-                        //         var lat = results[0].geometry.location.lat();
-                        //         var lng = results[0].geometry.location.lng();
-                        //         pin.lat = lat;
-                        //         pin.lng = lng;
-                        //         addMarker(pin)
-                        //     });
-                        // } else {
-                        //     addMarker(pin)
-                        // }
+                        for (const key in data) {
+                            const pin = data[key];
 
 
-                        addMarker(pin)
-                    }
+                            // if (pin.lat === null) {
+                            //     geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
+                            //         console.log('results', results);
+                            //         var lat = results[0].geometry.location.lat();
+                            //         var lng = results[0].geometry.location.lng();
+                            //         pin.lat = lat;
+                            //         pin.lng = lng;
+                            //         addMarker(pin)
+                            //     });
+                            // } else {
+                            //     addMarker(pin)
+                            // }
 
 
-                })
+                            addMarker(pin)
+                        }
+                    })
+            }
 
             function addMarker(pin) {
 
@@ -271,7 +281,7 @@
                         .then(function (response) {
                             console.log(response.status); // Will show you the status
                             if (response.status === 200) {
-                                reloadData();
+                                loadData();
                             }
 
                         })

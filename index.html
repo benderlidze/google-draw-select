@@ -29,6 +29,8 @@
 
 
         let map;
+        const allMarkers = [];
+        const markersInPoly = [];
 
         function initMap() {
 
@@ -38,28 +40,89 @@
                 center: new google.maps.LatLng(-33.92, 151.25),
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
-
             var infowindow = new google.maps.InfoWindow();
             var marker, i;
+
+
+
+            const drawingManager = new google.maps.drawing.DrawingManager({
+
+                drawingControl: true,
+                drawingControlOptions: {
+                    position: google.maps.ControlPosition.TOP_CENTER,
+                    drawingModes: [
+                        // google.maps.drawing.OverlayType.CIRCLE,
+                        google.maps.drawing.OverlayType.POLYGON,
+                        // google.maps.drawing.OverlayType.POLYLINE,
+                        //google.maps.drawing.OverlayType.RECTANGLE,
+                    ],
+                },
+                markerOptions: {
+                    icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+                },
+                circleOptions: {
+                    fillColor: "#ffff00",
+                    fillOpacity: 1,
+                    strokeWeight: 5,
+                    clickable: false,
+                    editable: true,
+                    zIndex: 1,
+                },
+            });
+            drawingManager.setMap(map);
+
+            google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
+
+                console.log('event,', event);
+                drawingManager.setDrawingMode(null);
+
+                const paths = event.overlay.getPath().getArray();
+                const coords = paths.map((a) => { return { lat: a.lat(), lng: a.lng() } });
+                console.log('coords', coords);
+
+                const polygon = new google.maps.Polygon({
+                    paths: coords,
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.35,
+                });
+                console.log('polygon', polygon);
+
+                markersInPoly.length = 0;
+
+                allMarkers.map(m => {
+                    const inside = google.maps.geometry.poly.containsLocation(m.getPosition(), polygon);
+                    console.log('inside', inside);
+                    if (inside) {
+                        markersInPoly.push(m)
+                    }
+                })
+
+                if (markersInPoly.length > 0) {
+                    let text = "";
+                    markersInPoly.map(i => {
+                        text += i.name + "\n"
+                    })
+                    alert(text);
+                }
+
+            });
 
 
             fetch("https://www.eolacoffee.com/route/locations.php")
                 .then(i => i.json())
                 .then(data => {
-
                     console.log('data', data);
-
                     map.setCenter({ lat: +data.center_lat, lng: +data.center_lng })
-
                     for (const key in data) {
-
                         const pin = data[key];
                         marker = new google.maps.Marker({
                             position: new google.maps.LatLng(+pin.lat, +pin.lng),
                             map: map,
                             options: pin
                         });
-
                         google.maps.event.addListener(marker, 'click', (function (marker, i) {
                             return function () {
                                 console.log('marker', marker);
@@ -68,15 +131,14 @@
                                 infowindow.open(map, marker);
                             }
                         })(marker, i));
+                        allMarkers.push(marker);
                     }
-
-
-
                 })
         }
     </script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjxBU2Rmj9czK28LqDbXvQIp5ccel9iwE&callback=initMap&libraries=&v=weekly"
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjxBU2Rmj9czK28LqDbXvQIp5ccel9iwE&callback=initMap&libraries=drawing,geometry&v=weekly"
         async></script>
 </body>
 

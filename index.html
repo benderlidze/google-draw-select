@@ -203,7 +203,7 @@
 
 
                             if (pin.lat === null || pin.lng === null || pin.lat === "" || pin.lng === "") {
-                                console.log('EMPTY DATA',pin);
+                                console.log('EMPTY DATA', pin);
                                 geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
                                     console.log('results', results);
                                     var lat = results[0].geometry.location.lat();
@@ -242,6 +242,17 @@
                     icon: pinImage,
                 });
 
+
+                marker.addListener('mouseover', function () {
+                    console.log('over',);
+                    drawingManager.setDrawingMode(null);
+                });
+
+                // assuming you also want to hide the infowindow when user mouses-out
+                marker.addListener('mouseout', function () {
+                    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+                });
+
                 marker.addListener("click", e => {
 
                     const dList = drivers.map(i => {
@@ -250,6 +261,7 @@
 
                     const content = `
                     <div>
+                        driver: ${marker.driver} <br>
                         street: ${marker.street} <br>
                         name: ${marker.name} <br>
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>

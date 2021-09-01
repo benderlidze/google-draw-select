@@ -34,7 +34,7 @@
         width: 20px;
         height: 20px;
         cursor: pointer;
-        float:right;
+        float: right;
     }
 
     .close:after {
@@ -61,6 +61,7 @@
 
 
         let map;
+        let setCenter = true;
         const close = document.getElementById("close")
         const modal = document.getElementById("modal")
         const modalContent = document.getElementById("modalContent")
@@ -104,7 +105,7 @@
                         //google.maps.drawing.OverlayType.RECTANGLE,
                     ],
                 },
-              
+
             });
             drawingManager.setMap(map);
 
@@ -184,7 +185,11 @@
                     .then(i => i.json())
                     .then(data => {
                         console.log('data', data);
-                        map.setCenter({ lat: +data.center_lat, lng: +data.center_lng })
+
+                        if (setCenter) {
+                            map.setCenter({ lat: +data.center_lat, lng: +data.center_lng })
+                            setCenter = false;
+                        }
                         const dNames = [];
 
                         //fill array with unique names 

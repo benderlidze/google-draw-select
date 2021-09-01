@@ -47,6 +47,7 @@
         padding: 2px;
     }
 </style>
+
 <body>
     <div id="modal">
         <div class="close" id="close"></div>
@@ -106,7 +107,7 @@
             google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
 
                 console.log('event,', event);
-                drawingManager.setDrawingMode(null);
+                // drawingManager.setDrawingMode(null);
 
                 currentPoly = event.overlay;
 
@@ -127,7 +128,6 @@
 
 
                 markersInPoly.length = 0;
-
                 allMarkers.map(m => {
                     const inside = google.maps.geometry.poly.containsLocation(m.getPosition(), polygon);
                     console.log('inside', inside);
@@ -202,21 +202,22 @@
                             const pin = data[key];
 
 
-                            // if (pin.lat === null) {
-                            //     geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
-                            //         console.log('results', results);
-                            //         var lat = results[0].geometry.location.lat();
-                            //         var lng = results[0].geometry.location.lng();
-                            //         pin.lat = lat;
-                            //         pin.lng = lng;
-                            //         addMarker(pin)
-                            //     });
-                            // } else {
-                            //     addMarker(pin)
-                            // }
+                            if (pin.lat === null || pin.lng === null || pin.lat === "" || pin.lng === "") {
+                                console.log('EMPTY DATA',pin);
+                                geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
+                                    console.log('results', results);
+                                    var lat = results[0].geometry.location.lat();
+                                    var lng = results[0].geometry.location.lng();
+                                    pin.lat = lat;
+                                    pin.lng = lng;
+                                    addMarker(pin)
+                                });
+                            } else {
+                                addMarker(pin)
+                            }
 
 
-                            addMarker(pin)
+                            //addMarker(pin)
                         }
                     })
             }
@@ -225,7 +226,7 @@
 
                 var pinColor = colorArray[driverNames.indexOf(pin.driver)];
 
-                if (pin.driver === undefined) {
+                if (pin.driver === undefined || pin.driver === "NULL" || pin.driver === null) {
                     pinColor = "000000"
                 }
 
@@ -266,6 +267,8 @@
                 modalContent.innerHTML = ""
                 currentPoly.setMap(null)
                 currentPoly = null;
+
+                drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
             })
 
             document.addEventListener("click", e => {

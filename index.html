@@ -90,7 +90,7 @@
 
             const drawingManager = new google.maps.drawing.DrawingManager({
                 drawingMode: google.maps.drawing.OverlayType.POLYGON,
-                drawingControl: false,
+                drawingControl: true,
                 drawingControlOptions: {
                     position: google.maps.ControlPosition.TOP_CENTER,
                     drawingModes: [
@@ -106,14 +106,12 @@
 
             google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
 
-                console.log('event,', event);
                 // drawingManager.setDrawingMode(null);
 
                 currentPoly = event.overlay;
 
                 const paths = event.overlay.getPath().getArray();
                 const coords = paths.map((a) => { return { lat: a.lat(), lng: a.lng() } });
-                console.log('coords', coords);
 
                 const polygon = new google.maps.Polygon({
                     paths: coords,
@@ -123,9 +121,6 @@
                     fillColor: "#FF0000",
                     fillOpacity: 0.35,
                 });
-                console.log('polygon', polygon);
-
-
 
                 markersInPoly.length = 0;
                 allMarkers.map(m => {
@@ -201,7 +196,6 @@
                         for (const key in data) {
                             const pin = data[key];
 
-
                             if (pin.lat === null || pin.lng === null || pin.lat === "" || pin.lng === "") {
                                 console.log('EMPTY DATA', pin);
                                 geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
@@ -243,6 +237,7 @@
                 });
 
 
+
                 marker.addListener('mouseover', function () {
                     console.log('over',);
                     drawingManager.setDrawingMode(null);
@@ -277,8 +272,11 @@
             close.addEventListener('click', () => {
                 modal.style.display = "none"
                 modalContent.innerHTML = ""
-                currentPoly.setMap(null)
-                currentPoly = null;
+
+                if (currentPoly) {
+                    currentPoly.setMap(null)
+                    currentPoly = null;
+                }
 
                 drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
             })
@@ -324,13 +322,31 @@
 
                 }
             })
+            document.addEventListener('keydown', function (e) {
+                // console.log('e', e);
+                if (e.keyCode == 27) {
+                    drawingManager.setDrawingMode(null);
+                    if (currentPoly) {
+                        currentPoly.setMap(null)
+                        currentPoly = null;
+                    }
+                }
+                if (e.key == "Control") {
+                    drawingManager.setDrawingMode(null);
+                }
+            });
+
+            document.addEventListener('keyup', function (e) {
+                // console.log('KEYUP', e);
+                drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+            });
+
         }
 
 
     </script>
 
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjxBU2Rmj9czK28LqDbXvQIp5ccel9iwE&callback=initMap&libraries=drawing,geometry&v=weekly"
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=drawing,geometry"
         async></script>
 </body>
 

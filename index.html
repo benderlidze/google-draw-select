@@ -111,10 +111,11 @@
 
             });
             drawingManager.setMap(map);
+            drawingManager.setDrawingMode(null);
 
             google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
 
-                // drawingManager.setDrawingMode(null);
+                drawingManager.setDrawingMode(null);
 
                 currentPoly = event.overlay;
 
@@ -264,9 +265,10 @@
 
                     const content = `
                     <div>
+                        ${marker.name} <br>
+                        ${marker.street}, ${marker.zip} <br>
                         driver: ${marker.driver} <br>
-                        street: ${marker.street} <br>
-                        name: ${marker.name} <br>
+                        STOP<br>
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>
                         <button class="set" sid="${pin.orderid}">Set</button>
                     </div>`
@@ -355,9 +357,14 @@
             const autocomplete = new google.maps.places.Autocomplete(input);
             google.maps.event.addListener(autocomplete, 'place_changed', function (e) {
                 var place = autocomplete.getPlace();
-                // console.log('place',place);
+                console.log('place', place);
                 map.setCenter(place.geometry.location);
                 //input.value = "";
+                new google.maps.Marker({
+                    position: place.geometry.location,
+                    map,
+                    title: place.formatted_address,
+                });
             });
 
 
@@ -367,14 +374,14 @@
                 drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
             });
 
-            const hand_btn = document.createElement("button");
-            buttonize(hand_btn, "MOVE");
-            hand_btn.addEventListener("click", () => {
-                drawingManager.setDrawingMode(null);
-            });
+            // const hand_btn = document.createElement("button");
+            // buttonize(hand_btn, "MOVE");
+            // hand_btn.addEventListener("click", () => {
+            //     drawingManager.setDrawingMode(null);
+            // });
 
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(poly_btn);
-            map.controls[google.maps.ControlPosition.TOP_CENTER].push(hand_btn);
+            //map.controls[google.maps.ControlPosition.TOP_CENTER].push(hand_btn);
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 
         }

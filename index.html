@@ -72,6 +72,7 @@
         const drivers = [];
         const driverNames = [];
         const allMarkers = [];
+        const driverMarkers = [];
         const markersInPoly = [];
         const colorArray = ['FF6633', 'FFB399', 'FF33FF', 'FFFF99', '00B3E6',
             'E6B333', '3366E6', '999966', '99FF99', 'B34D4D',
@@ -86,7 +87,7 @@
 
         function initMap() {
 
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 10,
                 center: new google.maps.LatLng(-33.92, 151.25),
                 mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -167,7 +168,7 @@
 
             loadData()
 
-            function loadData() {
+            async function loadData() {
 
                 if (allMarkers.length > 0) {
                     allMarkers.forEach(i => {
@@ -176,14 +177,34 @@
                     allMarkers.length = 0;
                 }
 
-                fetch("https://eolacoffee.com/route/locations.php?drivers=true")
+                await fetch("https://eolacoffee.com/route/locations.php?drivers=true")
                     .then(i => i.json())
                     .then(data => {
+                        console.log('drivers data', data);
                         drivers.push(...data)
+
+
+                        drivers.forEach(i => {
+
+                            const pinColor = 'FFFF00';
+                            var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                                new google.maps.Size(21, 34),
+                                new google.maps.Point(0, 0),
+                                new google.maps.Point(10, 34));
+
+                            const marker = new google.maps.Marker({
+                                position: new google.maps.LatLng(+i.lat, +i.lng),
+                                map: map,
+                                options: i,
+                                icon: pinImage,
+                            });
+                            driverMarkers.push(marker)
+
+                        })
                     })
 
 
-                fetch("https://www.eolacoffee.com/route/locations.php")
+                await fetch("https://eolacoffee.com/route/locations.php")
                     .then(i => i.json())
                     .then(data => {
                         console.log('data', data);
@@ -223,6 +244,8 @@
                             //addMarker(pin)
                         }
                     })
+
+                console.log('all done');
             }
 
             function addMarker(pin) {
@@ -249,12 +272,12 @@
 
                 marker.addListener('mouseover', function () {
                     console.log('over',);
-                    drawingManager.setDrawingMode(null);
+                    //drawingManager.setDrawingMode(null);
                 });
 
                 // assuming you also want to hide the infowindow when user mouses-out
                 marker.addListener('mouseout', function () {
-                    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+                    //drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
                 });
 
                 marker.addListener("click", e => {
@@ -266,7 +289,7 @@
                     const content = `
                     <div>
                         ${marker.name} <br>
-                        ${marker.street}, ${marker.zip} <br>
+                        ${marker.street}, ${marker.zipcode} <br>
                         driver: ${marker.driver} <br>
                         STOP<br>
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>
@@ -374,6 +397,25 @@
                 drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
             });
 
+
+            let hidden = false;
+            const drivers_btn = document.createElement("button");
+            buttonize(drivers_btn, "SHOW/HIDE");
+            drivers_btn.addEventListener("click", () => {
+
+                driverMarkers.forEach(i => {
+                    if (hidden) {
+                        i.setMap(map)
+                    } else {
+                        i.setMap(null)
+                    }
+
+                })
+                hidden = !hidden
+                console.log('hidden', hidden);
+
+            });
+
             // const hand_btn = document.createElement("button");
             // buttonize(hand_btn, "MOVE");
             // hand_btn.addEventListener("click", () => {
@@ -381,6 +423,7 @@
             // });
 
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(poly_btn);
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(drivers_btn);
             //map.controls[google.maps.ControlPosition.TOP_CENTER].push(hand_btn);
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 

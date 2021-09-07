@@ -195,7 +195,7 @@
                         drivers.forEach(i => {
 
                             const pinColor = 'FFFF00';
-                            var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                            var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|" + pinColor,
                                 new google.maps.Size(21, 34),
                                 new google.maps.Point(0, 0),
                                 new google.maps.Point(10, 34));
@@ -249,7 +249,7 @@
                                 console.log('=======================', search.name);
                                 console.log('', search.address);
                                 console.log('', pin.street);
-                                color = "000000"
+                                color = "FF0000"
                                 pin.eta = search.eta
                             }
 
@@ -285,12 +285,19 @@
 
                 if (color) {
                     pinColor = color;
+                    var pinImage = new google.maps.MarkerImage("https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=home%7C" + pinColor ,
+                        new google.maps.Size(21, 34),
+                        new google.maps.Point(0, 0),
+                        new google.maps.Point(10, 34));
+
+                } else {
+                    var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                        new google.maps.Size(21, 34),
+                        new google.maps.Point(0, 0),
+                        new google.maps.Point(10, 34));
+
                 }
 
-                var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
-                    new google.maps.Size(21, 34),
-                    new google.maps.Point(0, 0),
-                    new google.maps.Point(10, 34));
 
                 const marker = new google.maps.Marker({
                     position: new google.maps.LatLng(+pin.lat, +pin.lng),
@@ -319,12 +326,13 @@
 
                     let eta = '';
                     if (pin.eta && pin.eta !== "") {
-                        eta = `ETA:${pin.eta}<br>`;
+                        eta = `ETA:${pin.eta} minutes<br>`;
                     }
                     const content = `
                     <div>
                         ${marker.name} <br>
                         ${marker.street}, ${marker.zipcode} <br>
+                        <br>
                         driver: ${marker.driver} <br>
                         ${eta}
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>

@@ -176,6 +176,14 @@
                     })
                     allMarkers.length = 0;
                 }
+                //clear driverMarkers
+                if (driverMarkers.length > 0) {
+                    driverMarkers.forEach(i => {
+                        i.setMap(null);
+                    })
+                    driverMarkers.length = 0;
+                    drivers.length = 0;
+                }
 
                 await fetch("https://eolacoffee.com/route/locations.php?drivers=true")
                     .then(i => i.json())
@@ -194,12 +202,18 @@
 
                             const marker = new google.maps.Marker({
                                 position: new google.maps.LatLng(+i.lat, +i.lng),
-                                map: map,
                                 options: i,
                                 icon: pinImage,
                             });
+
                             driverMarkers.push(marker)
 
+                            marker.addListener("click", e => {
+
+                                const content = `<div>${i.current_stop}</div>`;
+                                infowindow.setContent(content);
+                                infowindow.open(map, marker);
+                            });
                         })
                     })
 
@@ -224,7 +238,19 @@
 
 
                         for (const key in data) {
+
                             const pin = data[key];
+                            let color;
+                            //console.log('pin', pin);
+
+                            const search = drivers.find(i => i.name === pin.driver)
+
+                            if (search && search.current_stop !== null && search.current_stop === pin.street) {
+                                console.log('=======================', search.name);
+                                console.log('', search.address);
+                                console.log('', pin.street);
+                                color = "000000"
+                            }
 
                             if (pin.lat === null || pin.lng === null || pin.lat === "" || pin.lng === "") {
                                 console.log('EMPTY DATA', pin);
@@ -234,10 +260,10 @@
                                     var lng = results[0].geometry.location.lng();
                                     pin.lat = lat;
                                     pin.lng = lng;
-                                    addMarker(pin)
+                                    addMarker(pin, color)
                                 });
                             } else {
-                                addMarker(pin)
+                                addMarker(pin, color)
                             }
 
 
@@ -248,12 +274,16 @@
                 console.log('all done');
             }
 
-            function addMarker(pin) {
+            function addMarker(pin, color) {
 
                 var pinColor = colorArray[driverNames.indexOf(pin.driver)];
 
                 if (pin.driver === undefined || pin.driver === "NULL" || pin.driver === null) {
                     pinColor = "000000"
+                }
+
+                if (color) {
+                    pinColor = color;
                 }
 
                 var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
@@ -390,7 +420,6 @@
                 });
             });
 
-
             const poly_btn = document.createElement("button");
             buttonize(poly_btn, "DRAW");
             poly_btn.addEventListener("click", () => {
@@ -398,21 +427,24 @@
             });
 
 
-            let hidden = false;
+            let hidden = true;
             const drivers_btn = document.createElement("button");
-            buttonize(drivers_btn, "SHOW/HIDE");
-            drivers_btn.addEventListener("click", () => {
+            buttonize(drivers_btn, "Show Drivers");
+            drivers_btn.addEventListener("click", function () {
 
                 driverMarkers.forEach(i => {
                     if (hidden) {
                         i.setMap(map)
+                        this.textContent = "Hide Drivers"
                     } else {
                         i.setMap(null)
+                        this.textContent = "Show Drivers"
                     }
 
                 })
                 hidden = !hidden
                 console.log('hidden', hidden);
+                console.log('this', this);
 
             });
 

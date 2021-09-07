@@ -250,6 +250,7 @@
                                 console.log('', search.address);
                                 console.log('', pin.street);
                                 color = "000000"
+                                pin.eta = search.eta
                             }
 
                             if (pin.lat === null || pin.lng === null || pin.lat === "" || pin.lng === "") {
@@ -316,12 +317,16 @@
                         return `<option value="${i.name}">${i.name}</option>`
                     }).join("")
 
+                    let eta = '';
+                    if (pin.eta && pin.eta !== "") {
+                        eta = `ETA:${pin.eta}<br>`;
+                    }
                     const content = `
                     <div>
                         ${marker.name} <br>
                         ${marker.street}, ${marker.zipcode} <br>
                         driver: ${marker.driver} <br>
-                        STOP<br>
+                        ${eta}
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>
                         <button class="set" sid="${pin.orderid}">Set</button>
                     </div>`

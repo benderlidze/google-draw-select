@@ -236,12 +236,18 @@
                         }
                         driverNames.push(...new Set(dNames));
 
+                        console.log('dNames', dNames);
+                        const counts = {};
+                        dNames.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+                        console.log('counts', counts);
 
                         for (const key in data) {
 
                             const pin = data[key];
                             let color;
                             //console.log('pin', pin);
+
+                            pin.STOPS = counts[pin.driver]
 
                             const search = drivers.find(i => i.name === pin.driver)
 
@@ -285,7 +291,7 @@
 
                 if (color) {
                     pinColor = color;
-                    var pinImage = new google.maps.MarkerImage("https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=home%7C" + pinColor ,
+                    var pinImage = new google.maps.MarkerImage("https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=home%7C" + pinColor,
                         new google.maps.Size(21, 34),
                         new google.maps.Point(0, 0),
                         new google.maps.Point(10, 34));
@@ -325,9 +331,16 @@
                     }).join("")
 
                     let eta = '';
+                    let stops = '';
+
                     if (pin.eta && pin.eta !== "") {
                         eta = `ETA:${pin.eta} minutes<br>`;
                     }
+
+                    if(pin.STOPS && pin.STOPS!==""){
+                        stops = `${marker.driver} (${pin.STOPS} stops)<br>`;
+                    }
+
                     const content = `
                     <div>
                         ${marker.name} <br>
@@ -335,6 +348,7 @@
                         <br>
                         driver: ${marker.driver} <br>
                         ${eta}
+                        ${stops}
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>
                         <button class="set" sid="${pin.orderid}">Set</button>
                     </div>`

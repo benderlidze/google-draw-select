@@ -151,7 +151,7 @@
                     text = `<div class="item">${markersInPoly.length} stops selected</div>`;
 
                     const dList = drivers.map(i => {
-                        return `<option value="${i.name}">${i.name}</option>`
+                        return `<option value="${i.name}" >${i.name}</option>`
                     }).join("")
 
                     const content = `
@@ -247,7 +247,8 @@
                             let color;
                             //console.log('pin', pin);
 
-                            pin.STOPS = counts[pin.driver]
+                            //pin.STOPS = counts[pin.driver]
+                            pin.STOPS = counts
 
                             const search = drivers.find(i => i.name === pin.driver)
 
@@ -337,8 +338,14 @@
                         eta = `ETA:${pin.eta} minutes<br>`;
                     }
 
-                    if(pin.STOPS && pin.STOPS!==""){
-                        stops = `${marker.driver} (${pin.STOPS} stops)<br>`;
+                    if (pin.STOPS && pin.STOPS !== "") {
+                        //stops = `${marker.driver} (${pin.STOPS} stops)<br>`;
+                        
+                        stops = `<select id="">`;
+                        for (const [key, value] of Object.entries(pin.STOPS)) {
+                            stops += `<option value="${value}">${key} ${value}</option>`
+                        }
+                        stops +=`</select><br>`;
                     }
 
                     const content = `

@@ -74,6 +74,7 @@
         const allMarkers = [];
         const driverMarkers = [];
         const markersInPoly = [];
+        let counts = {};
         const colorArray = ['FF6633', 'FFB399', 'FF33FF', 'FFFF99', '00B3E6',
             'E6B333', '3366E6', '999966', '99FF99', 'B34D4D',
             '80B300', '809900', 'E6B3B3', '6680B3', '66991A',
@@ -150,8 +151,20 @@
                     //alert(text);
                     text = `<div class="item">${markersInPoly.length} stops selected</div>`;
 
+
+
+
                     const dList = drivers.map(i => {
-                        return `<option value="${i.name}" >${i.name}</option>`
+
+                        let s = '';
+                        let selected = '';
+                        if (counts[i.name]) {
+                            s = '(' + counts[i.name] + ' stops)';
+                        }
+                        return `<option value="${i.name}" ${selected}>${i.name} ${s}</option>`
+
+
+                        //return `<option value="${i.name}" >${i.name}</option>`
                     }).join("")
 
                     const content = `
@@ -167,6 +180,9 @@
             });
 
             loadData()
+            setInterval(() => {
+                loadData()
+            }, 60000)
 
             async function loadData() {
 
@@ -237,7 +253,7 @@
                         driverNames.push(...new Set(dNames));
 
                         console.log('dNames', dNames);
-                        const counts = {};
+
                         dNames.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
                         console.log('counts', counts);
 
@@ -334,12 +350,14 @@
 
                     const dList = drivers.map(i => {
                         let s = '';
+                        let selected = '';
                         if (pin.STOPS[i.name]) {
                             s = '(' + pin.STOPS[i.name] + ' stops)';
                         }
-
-                        console.log('s', s);
-                        return `<option value="${i.name}">${i.name} ${s}</option>`
+                        if (i.name === marker.driver) {
+                            selected = 'selected'
+                        }
+                        return `<option value="${i.name}" ${selected}>${i.name} ${s}</option>`
                     }).join("")
 
                     let eta = '';

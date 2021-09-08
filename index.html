@@ -151,9 +151,6 @@
                     //alert(text);
                     text = `<div class="item">${markersInPoly.length} stops selected</div>`;
 
-
-
-
                     const dList = drivers.map(i => {
 
                         let s = '';
@@ -186,6 +183,7 @@
 
             async function loadData() {
 
+                counts = {};
                 if (allMarkers.length > 0) {
                     allMarkers.forEach(i => {
                         i.setMap(null);
@@ -207,11 +205,9 @@
                         console.log('drivers data', data);
                         drivers.push(...data)
 
-
                         drivers.forEach(i => {
-
                             const pinColor = 'FFFF00';
-                            var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|" + pinColor,
+                            var pinImage = new google.maps.MarkerImage("https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=home%7C" + pinColor,
                                 new google.maps.Size(21, 34),
                                 new google.maps.Point(0, 0),
                                 new google.maps.Point(10, 34));
@@ -225,7 +221,6 @@
                             driverMarkers.push(marker)
 
                             marker.addListener("click", e => {
-
                                 const content = `<div>${i.current_stop}</div>`;
                                 infowindow.setContent(content);
                                 infowindow.open(map, marker);
@@ -308,18 +303,12 @@
 
                 if (color) {
                     pinColor = color;
-                    var pinImage = new google.maps.MarkerImage("https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=home%7C" + pinColor,
-                        new google.maps.Size(21, 34),
-                        new google.maps.Point(0, 0),
-                        new google.maps.Point(10, 34));
-
-                } else {
-                    var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
-                        new google.maps.Size(21, 34),
-                        new google.maps.Point(0, 0),
-                        new google.maps.Point(10, 34));
-
                 }
+
+                var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                    new google.maps.Size(21, 34),
+                    new google.maps.Point(0, 0),
+                    new google.maps.Point(10, 34));
 
 
                 const marker = new google.maps.Marker({

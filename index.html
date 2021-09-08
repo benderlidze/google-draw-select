@@ -327,8 +327,19 @@
 
                 marker.addListener("click", e => {
 
+
+                    const dStops = Object.entries(pin.STOPS)
+                    console.log('dStops', dStops, pin.STOPS);
+                    console.log('driver', marker.driver);
+
                     const dList = drivers.map(i => {
-                        return `<option value="${i.name}">${i.name}</option>`
+                        let s = '';
+                        if (pin.STOPS[i.name]) {
+                            s = '(' + pin.STOPS[i.name] + ' stops)';
+                        }
+
+                        console.log('s', s);
+                        return `<option value="${i.name}">${i.name} ${s}</option>`
                     }).join("")
 
                     let eta = '';
@@ -338,24 +349,25 @@
                         eta = `ETA:${pin.eta} minutes<br>`;
                     }
 
+                    /*
                     if (pin.STOPS && pin.STOPS !== "") {
                         //stops = `${marker.driver} (${pin.STOPS} stops)<br>`;
-                        
                         stops = `<select id="">`;
                         for (const [key, value] of Object.entries(pin.STOPS)) {
                             stops += `<option value="${value}">${key} ${value}</option>`
                         }
                         stops +=`</select><br>`;
                     }
+                    */
 
+                    //driver: ${marker.driver} <br>
+                    // ${stops}
                     const content = `
                     <div>
                         ${marker.name} <br>
                         ${marker.street}, ${marker.zipcode} <br>
                         <br>
-                        driver: ${marker.driver} <br>
                         ${eta}
-                        ${stops}
                         <select class="setDriver" id="${pin.orderid}">${dList}</select><br>
                         <button class="set" sid="${pin.orderid}">Set</button>
                     </div>`

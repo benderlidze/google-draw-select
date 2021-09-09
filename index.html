@@ -221,7 +221,8 @@
                             driverMarkers.push(marker)
 
                             marker.addListener("click", e => {
-                                const content = `<div>${i.current_stop}</div>`;
+                                console.log('marker', marker);
+                                const content = `<div>${marker.name}</div>`;
                                 infowindow.setContent(content);
                                 infowindow.open(map, marker);
                             });

@@ -151,6 +151,12 @@
                     //alert(text);
                     text = `<div class="item">${markersInPoly.length} stops selected</div>`;
 
+
+
+                    //get driver name 
+                    
+                    const driverName = mostFrequent(markersInPoly.map(i=>i.driver))
+
                     const dList = drivers.map(i => {
 
                         let s = '';
@@ -158,9 +164,13 @@
                         if (counts[i.name]) {
                             s = '(' + counts[i.name] + ' stops)';
                         }
+
+                        if (i.name === driverName) {
+                            selected = 'selected'
+                        }
+
+
                         return `<option value="${i.name}" ${selected}>${i.name} ${s}</option>`
-
-
                         //return `<option value="${i.name}" >${i.name}</option>`
                     }).join("")
 
@@ -541,6 +551,16 @@
                 btn.style.background = "gray";
             });
         };
+
+
+        function mostFrequent(arr) {
+            return arr.sort((a, b) =>
+                arr.filter(v => v === a).length
+                - arr.filter(v => v === b).length
+            ).pop();
+        }
+
+        
 
     </script>
 

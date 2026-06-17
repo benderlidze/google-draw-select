@@ -63,6 +63,7 @@
     <input id="searchTextField" type="text" size="25">
     <div id="map" style="width: 100%; height: 100%;"></div>
     <script type="text/javascript">
+        const geocodeCache = {};
         let map;
         let setCenter = true;
         let currentPoly;
@@ -189,7 +190,7 @@
             loadData()
             setInterval(() => {
                 loadData()
-            }, 60000)
+            }, 5000)
 
             async function loadData() {
 
@@ -281,44 +282,49 @@
                         console.log('counts', counts);
 
                         for (const key in data) {
-
                             const pin = data[key];
                             let color;
-                            //console.log('pin', pin);
 
-                            //pin.STOPS = counts[pin.driver]
-                            pin.STOPS = counts
+                            pin.STOPS = counts;
 
-                            const search = drivers.find(i => i.name === pin.driver)
+                            const search = drivers.find(i => i.name === pin.driver);
 
                             if (search && search.current_stop !== null && search.current_stop === pin.street) {
-                                console.log('=======================', search.name);
-                                console.log('', search.address);
-                                console.log('', pin.street);
-                                color = "FF0000"
-                                pin.eta = search.eta
+                                color = "FF0000";
+                                pin.eta = search.eta;
                             }
 
                             if (pin.lat === null || pin.lng === null || pin.lat === "" || pin.lng === "") {
-                                console.log('EMPTY DATA', pin);
-                                geocoder.geocode({ 'address': pin.street + ", " + pin.zipcode }, function (results, status) {
-                                    console.log('results', results);
-                                    var lat = results[0].geometry.location.lat();
-                                    var lng = results[0].geometry.location.lng();
-                                    pin.lat = lat;
-                                    pin.lng = lng;
-                                    addMarker(pin, color)
+                                const address = `${pin.street}, ${pin.zipcode}`;
+
+                                if (geocodeCache[address]) {
+                                    console.log('use cached address', address);
+                                    pin.lat = geocodeCache[address].lat;
+                                    pin.lng = geocodeCache[address].lng;
+                                    addMarker(pin, color);
+                                    continue;
+                                }
+
+                                geocoder.geocode({ address }, function (results, status) {
+                                    if (status === "OK" && results[0]) {
+                                        const lat = results[0].geometry.location.lat();
+                                        const lng = results[0].geometry.location.lng();
+
+                                        geocodeCache[address] = { lat, lng };
+                                        pin.lat = lat;
+                                        pin.lng = lng;
+
+                                        addMarker(pin, color);
+                                    }
                                 });
                             } else {
-                                addMarker(pin, color)
+                                addMarker(pin, color);
                             }
-
-
-                            //addMarker(pin)
                         }
                     })
 
-                console.log('all done');
+                console.log('all done',{geocodeCache});
+                
             }
 
             function addMarker(pin, color) {
@@ -592,8 +598,9 @@
     </script>
 
     <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjxBU2Rmj9czK28LqDbXvQIp5ccel9iwE&callback=initMap&libraries=places,drawing,geometry&v=weekly&v=3.64"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAAE8HQNGBN5QD8v4DD3HbkUXS2nkcmVw&callback=initMap&libraries=places,drawing,geometry&v=weekly&v=3.64"
         async></script>
+
 </body>
 
 </html>
